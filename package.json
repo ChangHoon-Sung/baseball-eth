@@ -1,0 +1,10 @@
+{
+  "name": "baseball",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "ganache": "^7.8.0",
+    "truffle": "^5.8.4"
+  }
+}

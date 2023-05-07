@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Number Baseball</title>
+    <script>
+      const GameManagerABI = [
+        {
+          inputs: [],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          inputs: [],
+          name: "game",
+          outputs: [
+            {
+              internalType: "contract NumberBaseball",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "games",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getGameAddress",
+          outputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "getGameHistory",
+          outputs: [
+            {
+              internalType: "address[]",
+              name: "",
+              type: "address[]",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "onGameEnded",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+      ];
+
+      const BaseballABI = [
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "_managerAddress",
+              type: "address",
+            },
+          ],
+          stateMutability: "nonpayable",
+          type: "constructor",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "address",
+              name: "winner",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "winningNumber",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "winningAmount",
+              type: "uint256",
+            },
+          ],
+          name: "GameEnded",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [],
+          name: "GameStarted",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "address",
+              name: "player",
+              type: "address",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "guess",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "numStrikes",
+              type: "uint256",
+            },
+            {
+              indexed: false,
+              internalType: "uint256",
+              name: "numBalls",
+              type: "uint256",
+            },
+          ],
+          name: "GuessResult",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "address",
+              name: "player",
+              type: "address",
+            },
+          ],
+          name: "TurnStarted",
+          type: "event",
+        },
+        {
+          anonymous: false,
+          inputs: [
+            {
+              indexed: false,
+              internalType: "address",
+              name: "player",
+              type: "address",
+            },
+          ],
+          name: "TurnTimedOut",
+          type: "event",
+        },
+        {
+          inputs: [],
+          name: "JOIN_FEE",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "MAX_PLAYERS",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "PLAY_FEE",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "currentTurn",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "player",
+              type: "address",
+            },
+          ],
+          name: "isWinner",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "joinGame",
+          outputs: [],
+          stateMutability: "payable",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "numPlayers",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "guess",
+              type: "uint256",
+            },
+          ],
+          name: "play",
+          outputs: [],
+          stateMutability: "payable",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "playerAmounts",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "playerGuesses",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "playerLastAction",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "playerPlayed",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "address",
+              name: "",
+              type: "address",
+            },
+          ],
+          name: "playerWithdrawn",
+          outputs: [
+            {
+              internalType: "bool",
+              name: "",
+              type: "bool",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          name: "players",
+          outputs: [
+            {
+              internalType: "address payable",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "turnTimedoutTimestamp",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "winner",
+          outputs: [
+            {
+              internalType: "address payable",
+              name: "",
+              type: "address",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "winningAmount",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "winningNumber",
+          outputs: [
+            {
+              internalType: "uint256",
+              name: "",
+              type: "uint256",
+            },
+          ],
+          stateMutability: "view",
+          type: "function",
+        },
+        {
+          inputs: [],
+          name: "withdraw",
+          outputs: [],
+          stateMutability: "nonpayable",
+          type: "function",
+        },
+        {
+          stateMutability: "payable",
+          type: "receive",
+        },
+      ];
+    </script>
+    <script
+      type="text/javascript"
+      src="https://cdnjs.cloudflare.com/ajax/libs/web3/1.9.0/web3.min.js"
+    ></script>
+  </head>
+
+  <body>
+    <h1>Number Baseball</h1>
+    <div id="connectWallet">
+      <button id="connectButton" onclick="updateAccount()">
+        Connect Wallet
+      </button>
+      <p id="account"></p>
+    </div>
+    <div id="joinGame">
+      <h2>Join the Game</h2>
+      <p>Join fee: 1 ether</p>
+      <button onclick="joinGame()">Join</button>
+    </div>
+    <div id="playGame" style="display: none">
+      <h2>Play the Game</h2>
+      <p>
+        Number of players: <span id="numPlayers">Waiting other players...</span>
+      </p>
+      <p>Winning amount: <span id="winningAmount"></span> ether</p>
+      <p>Fee per play: 0.1 ether</p>
+      <hr />
+      <p>Game Message: <span id="message"></span></p>
+      <p>Current turn: <span id="currentTurn"></span></p>
+      <p>Your guess: <input type="number" id="guess" min="100" max="999" /></p>
+      <button id="play" onclick="play()">Play</button>
+      <p id="guessResult"></p>
+    </div>
+    <div id="gameResult" style="display: none">
+      <h2>Game Result</h2>
+      <p id="gameEnded"></p>
+      <button onclick="withdraw()">Withdraw</button>
+      <button onclick="location.reload()">Play Again</button>
+    </div>
+    <script>
+      const web3 = new Web3(Web3.givenProvider || "http://127.0.0.1:8545");
+
+      let account = null;
+
+      const GameManagerAddress = "0x7bE324A085389c82202BEb90D979d097C5b3f2E8";
+      const gameManagerContract = new web3.eth.Contract(
+        GameManagerABI,
+        GameManagerAddress
+      );
+
+      let gameAddress = null;
+      let baseballContract = null;
+
+      let currentTurn = null;
+
+      async function init() {
+        // 계정 가져오기
+        updateAccount();
+
+        const accounts = await ethereum.request({
+          method: "eth_accounts",
+        });
+        account = accounts[0];
+
+        gameAddress = await gameManagerContract.methods.getGameAddress().call();
+        // gameAddress = "0xAA1E8417b27DF71d2AeFB8C7Ba3ce7c93Bba71c0";
+        console.log(`Current Game address: ${gameAddress}`);
+
+        // 계정 로그인
+        baseballContract = new web3.eth.Contract(BaseballABI, gameAddress);
+
+        baseballContract.events
+          .GameStarted()
+          .on("data", async (event) => {
+            document.getElementById("message").textContent = "Game started!";
+          })
+          .on("error", console.error);
+
+        baseballContract.events
+          .TurnStarted()
+          .on("data", async (event) => {
+            console.log(`Turn started: ${event.returnValues.player}`);
+            if (
+              event.returnValues.player.toLowerCase() == account.toLowerCase()
+            ) {
+              document.getElementById("message").textContent = "Your turn!";
+              document.getElementById("guess").disabled = false;
+              document.getElementById("play").disabled = false;
+            } else {
+              document.getElementById("message").textContent =
+                "Waiting other players...";
+              document.getElementById("guess").disabled = true;
+              document.getElementById("play").disabled = true;
+            }
+          })
+          .on("error", console.error);
+
+        baseballContract.events
+          .GuessResult()
+          .on("data", async (event) => {
+            if (
+              event.returnValues.player.toLowerCase() != account.toLowerCase()
+            )
+              return;
+
+            const guess = event.returnValues.guess;
+            const numStrikes = event.returnValues.numStrikes;
+            const numBalls = event.returnValues.numBalls;
+            document.getElementById(
+              "guessResult"
+            ).innerHTML += `Guess '${guess}' result: ${numStrikes} strikes, ${numBalls} balls<br />`;
+          })
+          .on("error", console.error);
+
+        baseballContract.events
+          .GameEnded()
+          .on("data", async (event) => {
+            const winner = event.returnValues.winner;
+            const winningNumber = event.returnValues.winningNumber;
+            const winningAmount = event.returnValues.winningAmount;
+            document.getElementById(
+              "gameEnded"
+            ).textContent = `Game ended. Winner: ${winner}, winning number: ${winningNumber}, winning amount: ${web3.utils.fromWei(
+              winningAmount
+            )} ether`;
+            document.getElementById("playGame").style.display = "none";
+            document.getElementById("gameResult").style.display = "block";
+          })
+          .on("error", console.error);
+
+        updateUI();
+
+        // UI 업데이트
+        setInterval(updateUI, 1000);
+      }
+
+      async function updateUI() {
+        // 참가자 수, 현재 차례, 이긴 사람이 가져갈 금액, 정답 숫자 가져오기
+        let numPlayers = await baseballContract.methods.numPlayers().call();
+        currentTurn = await baseballContract.methods.currentTurn().call();
+        let winningAmount = await baseballContract.methods
+          .winningAmount()
+          .call();
+
+        // UI 업데이트
+        document.getElementById("numPlayers").textContent = numPlayers;
+        document.getElementById("currentTurn").textContent = currentTurn;
+        document.getElementById("winningAmount").textContent =
+          web3.utils.fromWei(winningAmount);
+
+        // 게임 참가 여부에 따라 UI 업데이트
+        const playerAmounts = await baseballContract.methods
+          .playerAmounts(account)
+          .call();
+        if (playerAmounts > 0) {
+          document.getElementById("joinGame").style.display = "none";
+          document.getElementById("playGame").style.display = "block";
+        } else {
+          document.getElementById("joinGame").style.display = "block";
+          document.getElementById("playGame").style.display = "none";
+        }
+      }
+
+      async function joinGame() {
+        try {
+          const result = await baseballContract.methods
+            .joinGame()
+            .send({ from: account, value: web3.utils.toWei("1", "ether") });
+          console.log(result);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      async function play() {
+        try {
+          const guess = document.getElementById("guess").value;
+          if (guess.length != 3) {
+            alert("Please enter a 3-digit number");
+            return;
+          }
+          if (
+            guess[0] == guess[1] ||
+            guess[1] == guess[2] ||
+            guess[0] == guess[2]
+          ) {
+            alert("Please enter a number without duplicate digits");
+            return;
+          }
+          const result = await baseballContract.methods
+            .play(guess)
+            .send({ from: account, value: web3.utils.toWei("0.1", "ether") });
+          console.log(result);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      async function withdraw() {
+        try {
+          const result = await baseballContract.methods
+            .withdraw()
+            .send({ from: account });
+          console.log(result);
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      async function updateAccount() {
+        const accounts = await ethereum.request({
+          method: "eth_requestAccounts",
+        });
+        if (accounts.length === 0) {
+          document.getElementById("account").textContent = "Not connected";
+        } else {
+          document.getElementById(
+            "account"
+          ).textContent = `Current Wallet: ${accounts[0]}`;
+          document.getElementById("connectButton").style.display = "none";
+        }
+      }
+
+      ethereum.on("accountsChanged", updateAccount);
+      init();
+    </script>
+  </body>
+</html>
